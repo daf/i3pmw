@@ -4,9 +4,11 @@ Allows switching all your outputs at once to a major.minor workspace syntax, whe
 give the major number, and minor numbers are determined by your outputs.  e.g. switch to
 workspace 3, your outputs will be switched to 3.1, 3.2, and 3.3.
 
+i3pmw will attempt to determine your output order left-to-right in a simplistic fashion 
+(sorting by `x`). Submit issues if broken.
+
 ## TODO
 
-- output configuration (hardcoded atm)
 - stick dummy i3wm containers on blank workspaces so they will stay in bar
 
 ## Installation
