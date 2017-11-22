@@ -17,13 +17,7 @@ monmap = {
 def cli():
     pass
 
-@click.command()
-@click.argument('workspace')
-def switch(workspace):
-    """
-    Switch it to the base workspace passed in, creating workspaces as needed
-    """
-
+def _make_workspaces(workspace):
     # get current workspace
     cur_workspaces = i3.get_workspaces()
     cur_workspace = next(w for w in cur_workspaces if w['focused'])
@@ -41,16 +35,41 @@ def switch(workspace):
     for output, subnum in monmap.items():
         new_ws = "{}.{}".format(workspace, subnum)
 
-        print(new_ws)
+        i3.command("focus output {}".format(output))
+        i3.command("workspace {}".format(new_ws))
 
-        if new_ws not in cur_workspace_names:
-            print(i3.command("focus output {}".format(output)))
-            print(i3.command("workspace {}".format(new_ws)))
+    # what should be focused?
+    target_ws = "{}.{}".format(workspace, cur_workspace_subnum)
 
-    # always switch to the subnum
-    i3.command("workspace {}.{}".format(workspace, cur_workspace_subnum))
+    return target_ws
+
+@click.command()
+@click.argument('workspace')
+def switch(workspace):
+    """
+    Switch it to the base workspace passed in, creating workspaces as needed
+    """
+    target_ws = _make_workspaces(workspace)
+    i3.command("workspace {}".format(target_ws))
 
 cli.add_command(switch)
+
+@click.command()
+@click.argument('workspace')
+def move(workspace):
+    """
+    Move selected item to base workspace, same monitor it's currently on
+    """
+    cur_con = i3.get_tree().find_focused()
+
+    # call helper
+    target_ws = _make_workspaces(workspace)
+
+    # move container
+    i3.command("[con_id=\"{}\"] move container to workspace {}".format(cur_con.id, target_ws))
+    i3.command("workspace {}".format(target_ws))
+
+cli.add_command(move)
 
 if __name__ == "__main__":
     cli()
